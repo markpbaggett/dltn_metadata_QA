@@ -2,8 +2,6 @@ __author__ = 'mbagget1'
 from pymongo import MongoClient
 import sys
 import argparse
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 parser = argparse.ArgumentParser(description='Enter Your OAI Endpoint Information')
 parser.add_argument("-f", "--field", dest="dc_field", help="Specify DC Field", required=True)
@@ -18,7 +16,7 @@ total_records = 0
 text_file = open('uniquerecords.txt', 'w')
 for document in cursor:
     print(document)
-    text_file.write('{0}\n'.format(document))
+    text_file.write('\n\n{0}\n'.format(document))
     total_records += 1
 text_file.close()
 print('\n\n{0}'.format(total_records))
