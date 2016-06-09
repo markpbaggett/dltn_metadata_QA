@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser(description='Enter Your OAI Endpoint Informatio
 parser.add_argument("-u", "--url", dest="urlforoai", help="Specify your OAI endpoint")
 parser.add_argument("-s", "--set", dest="oaiset", help="Specify your OAI set", required=True)
 parser.add_argument("-f", "--field", dest="dc_field", help="Specify DC Field", required=True)
+parser.add_argument("-d", "--database", dest="database", help="What database?")
 args = parser.parse_args()
 
 client = MongoClient()
@@ -22,7 +23,7 @@ def grab_oai(url, token):
                                             'f': 'http://www.openarchives.org/OAI/2.0/oai_dc/',
                                             'g': 'http://purl.org/dc/elements/1.1/'})
     for publisher in publishers:
-        result = db.oaipublishers.insert_one({dc_field: publisher.text})
+        result = db.database.insert_one({dc_field: publisher.text})
     if len(new_session_token) == 1:
         resumption_token = '&resumptionToken={0}'.format(new_session_token[0].text)
         grab_oai(oai_endpoint, resumption_token)
@@ -32,16 +33,20 @@ def grab_oai(url, token):
 
 if __name__ == "__main__":
     # Defaults
-    oai_endpoint = 'http://dpla.lib.utk.edu:8080/repox/OAIHandler?verb=ListRecords'
+    oai_endpoint = 'http://dpla.lib.utk.edu:8080/repox/OAIHandler'
     oai_set = '&set='
     metadata_prefix = '&metadataPrefix=oai_dc'
     session_token = ''
     num_publishers = 0
+    database = "oaipublishers"
 
     if args.urlforoai:
         oai_endpoint = args.urlforoai
     oai_set = oai_set + args.oaiset
     dc_field = args.dc_field
+    if args.database:
+        database = args.database
+    oai_endpoint = oai_endpoint +"?verb=ListRecords"
 
     full_search_string = oai_endpoint + oai_set + metadata_prefix
     grab_oai(full_search_string, session_token)
