@@ -14,16 +14,24 @@ args = parser.parse_args()
 client = MongoClient()
 db = client.oaidc
 
+def check_endpoint(url):
+    document = etree.parse(url)
+    error_code = document.findall('//{http://www.openarchives.org/OAI/2.0/}error')
+    if len(error_code) == 1:
+        print("\nThere is something wrong with your OAI-PMH endpoint. Make sure your set exists.")
+    else:
+        grab_oai(url, session_token)
 
 def grab_oai(url, token):
     document = etree.parse(url + token)
+    print(url+token)
     new_session_token = document.findall('//{http://www.openarchives.org/OAI/2.0/}resumptionToken')
     publishers = document.xpath('/e:OAI-PMH/e:ListRecords/e:record/e:metadata/f:dc/g:{0}'.format(dc_field),
                                 namespaces={'e': 'http://www.openarchives.org/OAI/2.0/',
                                             'f': 'http://www.openarchives.org/OAI/2.0/oai_dc/',
                                             'g': 'http://purl.org/dc/elements/1.1/'})
     for publisher in publishers:
-        result = mongocollection.insert_one({dc_field: publisher.text})
+        result = mongocollection.insert_one({"set": oai_set, dc_field: publisher.text})
     if len(new_session_token) == 1:
         resumption_token = '&resumptionToken={0}'.format(new_session_token[0].text)
         grab_oai(oai_endpoint, resumption_token)
@@ -34,9 +42,8 @@ def grab_oai(url, token):
 if __name__ == "__main__":
     # Defaults
     oai_endpoint = 'http://dpla.lib.utk.edu:8080/repox/OAIHandler'
-    oai_set = '&set='
     metadata_prefix = '&metadataPrefix=oai_dc'
-    session_token = ''
+    oai_set = session_token = ''
     num_publishers = 0
     collection = "default"
 
@@ -49,5 +56,5 @@ if __name__ == "__main__":
     mongocollection = db[collection]
     oai_endpoint = oai_endpoint +"?verb=ListRecords"
 
-    full_search_string = oai_endpoint + oai_set + metadata_prefix
-    grab_oai(full_search_string, session_token)
+    full_search_string = oai_endpoint + '&set=' + oai_set + metadata_prefix
+    check_endpoint(full_search_string)
