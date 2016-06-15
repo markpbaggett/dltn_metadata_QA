@@ -45,8 +45,7 @@ def grab_oai(url, token, num_of_records):
         resumption_token = '&resumptionToken={0}'.format(new_session_token[0].text)
         if resumption_token != '&resumptionToken=None':
             grab_oai(oai_endpoint, resumption_token, num_of_records)
-        else:
-            print('\nRecord creation complete. Created or updated {0} records.\n'.format(num_of_records))
+    print('\nRecord creation complete. Created or updated {0} records.\n'.format(num_of_records))
 
 
 if __name__ == "__main__":
