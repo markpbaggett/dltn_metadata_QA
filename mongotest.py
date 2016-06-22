@@ -11,6 +11,7 @@ parser.add_argument("-o", "--operation", dest="operation", help="Choose operatio
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
 args = parser.parse_args()
 
+
 def find_matching_documents(format, collection, field, value):
     if format == "oai_dc":
         formatted_field = '{"metadata.' + format + ':dc.dc:' + field + '": "' + value + '"}'
@@ -19,15 +20,7 @@ def find_matching_documents(format, collection, field, value):
     print(formatted_field)
     data = json.loads(formatted_field)
     matching_documents = collection.find(data)
-    total_records = 0
-    text_file = open('uniquerecords.txt', 'w')
-    print('\nUnique values in {0} field:\n'.format(formatted_field))
-    for document in matching_documents:
-        print('\t{0}\n'.format(document))
-        text_file.write('\n\n{0}\n'.format(document))
-        total_records += 1
-    text_file.close()
-    print('\nTotal distinct values: {0}'.format(total_records))
+    create_file(matching_documents, formatted_field)
 
 
 def find_distinct(format, collection, field):
@@ -36,10 +29,14 @@ def find_distinct(format, collection, field):
     else:
         formatted_field = 'metadata.' + format + '.' + field
     cursor = collection.distinct(formatted_field)
+    create_file(cursor, formatted_field)
+
+
+def create_file(parseable_object, field):
     total_records = 0
     text_file = open('uniquerecords.txt', 'w')
-    print('\nUnique values in {0} field:\n'.format(formatted_field))
-    for document in cursor:
+    print('\nUnique values in {0} field:\n'.format(field))
+    for document in parseable_object:
         print('\t{0}\n'.format(document))
         text_file.write('\n\n{0}\n'.format(document))
         total_records += 1
@@ -67,5 +64,4 @@ def main():
         find_distinct(metadata_format, mongo_collection, key)
 
 if __name__ == "__main__":
-    # db.utk_master.find({'metadata.mods.accessCondition':'Public domain.'}).pretty()
     main()
