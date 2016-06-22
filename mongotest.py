@@ -20,7 +20,8 @@ def find_matching_documents(format, collection, field, value):
     print(formatted_field)
     data = json.loads(formatted_field)
     matching_documents = collection.find(data)
-    create_file(matching_documents, formatted_field)
+    message = 'records with matching values'
+    create_file(matching_documents, formatted_field, message)
 
 
 def find_distinct(format, collection, field):
@@ -29,19 +30,20 @@ def find_distinct(format, collection, field):
     else:
         formatted_field = 'metadata.' + format + '.' + field
     cursor = collection.distinct(formatted_field)
-    create_file(cursor, formatted_field)
+    message = 'distinct values'
+    create_file(cursor, formatted_field, message)
 
 
-def create_file(parseable_object, field):
+def create_file(parseable_object, field, system_string):
     total_records = 0
-    text_file = open('uniquerecords.txt', 'w')
+    text_file = open('result.txt', 'w')
     print('\nUnique values in {0} field:\n'.format(field))
     for document in parseable_object:
         print('\t{0}\n'.format(document))
         text_file.write('\n\n{0}\n'.format(document))
         total_records += 1
     text_file.close()
-    print('\nTotal distinct values: {0}'.format(total_records))
+    print('\nTotal {0}: {1}'.format(system_string, total_records))
 
 
 def main():
