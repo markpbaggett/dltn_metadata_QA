@@ -45,7 +45,7 @@ Several different scripts to help with metadata QA and cleanup for the Digital L
 		
 **Find all distinct values associated with the *"dc:rights"* field in *"mtsu_master""*.**
 
-`python3 mongotest.py -m oai_dc -c mtsu_master -rights`
+`python3 mongotest.py -m oai_dc -c mtsu_master -f rights`
 
 **Find all records in "*mtsu_master*" that have a "*dc:rights*" field with the value of "*Not covered by copyright*".**
 
