@@ -17,7 +17,6 @@ def find_matching_documents(format, collection, field, value):
         formatted_field = '{"metadata.' + format + ':dc.dc:' + field + '": "' + value + '"}'
     else:
         formatted_field = '{"metadata.' + format + '.' + field + '": "' + value + '"}'
-    print(formatted_field)
     data = json.loads(formatted_field)
     matching_documents = collection.find(data)
     message = 'records with matching values'
@@ -46,6 +45,18 @@ def create_file(parseable_object, field, system_string):
     print('\nTotal {0}: {1}'.format(system_string, total_records))
 
 
+def check_exists(format, collection, field):
+    if format == "oai_dc":
+        formatted_field = '{"metadata.' + format + ':dc.dc:' + field
+    else:
+        formatted_field = '{"metadata.' + format + '.' + field
+    formatted_field += '": { "$exists" : false }}'
+    data = json.loads(formatted_field)
+    missing_elements = collection.find(data)
+    message = 'records missing this element'
+    create_file(missing_elements, formatted_field, message)
+
+
 def main():
     key = args.field
     if args.collection:
@@ -62,6 +73,8 @@ def main():
             print("\nMatch operations require both a key and a value.")
         else:
             find_matching_documents(metadata_format, mongo_collection, key, string_value)
+    if args.operation == 'exists':
+        check_exists(metadata_format, mongo_collection, key)
     else:
         find_distinct(metadata_format, mongo_collection, key)
 
