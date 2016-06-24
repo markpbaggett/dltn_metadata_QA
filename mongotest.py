@@ -7,7 +7,7 @@ parser.add_argument("-f", "--field", dest="field", help="Specify DC Field", requ
 parser.add_argument("-c", "--collection", dest="collection", help="What collection are we calling?")
 parser.add_argument("-m", "--metadata_format", dest="metadata_format", help="Specify OAI metadata prefix",
                     required=True)
-parser.add_argument("-o", "--operation", dest="operation", help="Choose operation.")
+parser.add_argument("-o", "--operation", dest="operation", help="Choose operation.", required=True)
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
 args = parser.parse_args()
 
@@ -75,7 +75,7 @@ def main():
             find_matching_documents(metadata_format, mongo_collection, key, string_value)
     if args.operation == 'exists':
         check_exists(metadata_format, mongo_collection, key)
-    else:
+    if args.operation == 'find':
         find_distinct(metadata_format, mongo_collection, key)
 
 if __name__ == "__main__":
