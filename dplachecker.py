@@ -7,7 +7,7 @@ import urllib
 
 parser = argparse.ArgumentParser(description='Enter Your OAI Endpoint Information')
 parser.add_argument("-u", "--url", dest="urlforoai", help="Specify your OAI endpoint")
-parser.add_argument("-s", "--set", dest="oaiset", help="Specify your OAI set", required=True)
+parser.add_argument("-s", "--set", dest="oaiset", help="Specify your OAI set")
 parser.add_argument("-m", "--metadata_prefix", dest="metadata_prefix", help="Specify metadata prefix", required=True)
 parser.add_argument("-c", "--collection", dest="collection", help="Which collection?")
 args = parser.parse_args()
@@ -58,12 +58,13 @@ if __name__ == "__main__":
 
     if args.urlforoai:
         oai_endpoint = args.urlforoai
-    oai_set = oai_set + args.oaiset
+    if args.oaiset:
+        oai_set = '&set=' + oai_set + args.oaiset
     if args.collection:
         collection = args.collection
     mongocollection = db[collection]
     oai_endpoint = oai_endpoint + "?verb=ListRecords"
     metadata_prefix += args.metadata_prefix
 
-    full_search_string = oai_endpoint + '&set=' + oai_set + metadata_prefix
+    full_search_string = oai_endpoint + oai_set + metadata_prefix
     check_endpoint(full_search_string)
