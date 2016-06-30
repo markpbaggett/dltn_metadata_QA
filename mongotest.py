@@ -36,12 +36,19 @@ def find_distinct(format, collection, field):
 def create_file(parseable_object, field, system_string):
     total_records = 0
     text_file = open('result.txt', 'w')
+    report = open('report.txt', 'w')
+    if system_string == 'records missing this element':
+        report.write('These records are missing a {0}:\n\n'.format(field))
     print('\nUnique values in {0} field:\n'.format(field))
     for document in parseable_object:
         print('\t{0}\n'.format(document))
         text_file.write('\n\n{0}\n'.format(document))
+        if system_string == 'records missing this element':
+            report.write('\n{1}. MODS: dpla.lib.utk.edu/repox/OAIHandler?verb=GetRecord&identifier={0}&metadataPrefix=MODS\n'.format(document['record_id'], total_records + 1))
+            report.write('\n\tOAI_DC: dpla.lib.utk.edu/repox/OAIHandler?verb=GetRecord&identifier={0}&metadataPrefix=oai_dc\n\n'.format(document['record_id']))
         total_records += 1
     text_file.close()
+    report.close()
     print('\nTotal {0}: {1}'.format(system_string, total_records))
 
 
