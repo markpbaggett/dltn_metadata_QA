@@ -7,7 +7,7 @@ parser.add_argument("-f", "--field", dest="field", help="Specify DC Field", requ
 parser.add_argument("-c", "--collection", dest="collection", help="What collection are we calling?")
 parser.add_argument("-m", "--metadata_format", dest="metadata_format", help="Specify OAI metadata prefix",
                     required=True)
-parser.add_argument("-o", "--operation", dest="operation", help="Choose operation.", required=True)
+parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, or find.", required=True)
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
 args = parser.parse_args()
 
