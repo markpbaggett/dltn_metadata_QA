@@ -38,14 +38,14 @@ def grab_oai(url, token, num_of_records):
         if 'metadata' in json_document['OAI-PMH']['ListRecords']['record'][i]:
             record_id = json_document['OAI-PMH']['ListRecords']['record'][i]['header']['identifier']
             metadata = json_document['OAI-PMH']['ListRecords']['record'][i]['metadata']
-            result = mongocollection.insert_one({"record_id": record_id, "metadata": metadata})
+            result = mongocollection.insert_one({"record_id": record_id, "oai_provider": oai_endpoint, "metadata": metadata})
             num_of_records += 1
         i += 1
     print('\nRecord creation complete. Created or updated {0} records.\n'.format(num_of_records))
     if len(new_session_token) == 1:
         resumption_token = '&resumptionToken={0}'.format(new_session_token[0].text)
         if resumption_token != '&resumptionToken=None':
-            grab_oai(oai_endpoint, resumption_token, num_of_records)
+            grab_oai(oai_endpoint + "?verb=ListRecords", resumption_token, num_of_records)
 
 
 if __name__ == "__main__":
@@ -63,8 +63,7 @@ if __name__ == "__main__":
     if args.collection:
         collection = args.collection
     mongocollection = db[collection]
-    oai_endpoint = oai_endpoint + "?verb=ListRecords"
     metadata_prefix += args.metadata_prefix
 
-    full_search_string = oai_endpoint + oai_set + metadata_prefix
+    full_search_string = oai_endpoint + "?verb=ListRecords" + oai_set + metadata_prefix
     check_endpoint(full_search_string)
