@@ -38,7 +38,7 @@ def grab_oai(url, token, num_of_records):
         if 'metadata' in json_document['OAI-PMH']['ListRecords']['record'][i]:
             record_id = json_document['OAI-PMH']['ListRecords']['record'][i]['header']['identifier']
             metadata = json_document['OAI-PMH']['ListRecords']['record'][i]['metadata']
-            result = mongocollection.insert_one({"record_id": record_id, "oai_provider": oai_endpoint, "metadata": metadata})
+            result = mongocollection.update({"record_id": record_id},{"record_id": record_id, "oai_provider": oai_endpoint, "metadata": metadata}, True)
             num_of_records += 1
         i += 1
     print('\nRecord creation complete. Created or updated {0} records.\n'.format(num_of_records))
