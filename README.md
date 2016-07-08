@@ -44,19 +44,33 @@ Several different scripts to help with metadata QA and cleanup for the Digital L
 ### Q/A-ing your Metadata with *analyze.py*
 
 #### Find Unique Values with "*Find*" Operation
-**Example:** Find all distinct values associated with the *"dc:rights"* field in *"mtsu_master""*.
+**DC Example:** Find all distinct values associated with the *"dc:rights"* field in *"mtsu_master""*.
 
 `python3 analyze.py -m oai_dc -c mtsu_master -f rights`
 
+**MODS Example:** Find all distinct authorities associated with subjects the dltn_master collection.
+
+`python3 analyze.py -c dltn_master -f subject.@authority -o find -m mods`
+
 #### Find Records that Match Query with "*Match*" Operation
-**Example**: Find all records in "*mtsu_master*" that have a "*dc:rights*" field with the value of "*Not covered by copyright*".
+**DC Example**: Find all records in "*mtsu_master*" that have a "*dc:rights*" field with the value of "*Not covered by copyright*".
 
 `python3 analyze.py -m oai_dc -c mtsu_master -f rights -o match -s "Not covered by copyright"`
 
+**MODS Example**: Find all records in "*dltn_master*" that have a "*\physicalDescription\form" element with a text value of "*illustrations*".
+
+`python3 analyze.py -c dltn_master -f physicalDescription.form.#text -o match -m mods -s "illustrations"
+`
+
 #### Find If Any Records in a Collection are Missing a Particular Field (Element) with "Exists" Operation
-**Example**: Find if any records in "*mtsu_master*" are missing a "*dc:rights*" field.
+**DC Example**: Find if any records in "*mtsu_master*" are missing a "*dc:rights*" field.
 
 `python3 analyze.py -m oai_dc -c mtsu_master -f rights -o exists`
+
+**MODS Example**: Find if any records are missing a "*\location\url*".
+
+`python3 analyze.py -c dltn_master -f location.url -o exists -m mods`
+
 
 #### All available flags with *analyze.py*:
 * -m
