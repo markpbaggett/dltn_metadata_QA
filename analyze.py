@@ -15,6 +15,8 @@ args = parser.parse_args()
 def find_matching_documents(format, collection, field, value):
     if format == "oai_dc":
         formatted_field = '{"metadata.' + format + ':dc.dc:' + field + '": "' + value + '"}'
+    elif format == "oai_qdc":
+        formatted_field = '{"metadata.' + format + ':qualifieddc.' + field + '": "' + value + '"}'
     else:
         formatted_field = '{"metadata.' + format + '.' + field + '": "' + value + '"}'
     data = json.loads(formatted_field)
@@ -26,6 +28,8 @@ def find_matching_documents(format, collection, field, value):
 def find_distinct(format, collection, field):
     if format == "oai_dc":
         formatted_field = 'metadata.' + format + ':dc.dc:' + field
+    elif format == "oai_qdc":
+        formatted_field = 'metadata.' + format + ':qualifieddc.' + field
     else:
         formatted_field = 'metadata.' + format + '.' + field
     cursor = collection.distinct(formatted_field)
@@ -55,6 +59,8 @@ def create_file(parseable_object, field, system_string):
 def check_exists(format, collection, field):
     if format == "oai_dc":
         formatted_field = '{"metadata.' + format + ':dc.dc:' + field
+    elif format == "oai_qdc":
+        formatted_field = '{"metadata.' + format + ':qualifieddc.' + field
     else:
         formatted_field = '{"metadata.' + format + '.' + field
     formatted_field += '": { "$exists" : false }}'
