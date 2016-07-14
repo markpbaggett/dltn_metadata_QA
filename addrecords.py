@@ -31,14 +31,16 @@ def grab_oai(url, token, num_of_records):
     new_session_token = document.findall('//{http://www.openarchives.org/OAI/2.0/}resumptionToken')
     request = urllib.request.urlopen(url+token)
     json_string = json.dumps(xmltodict.parse(request))
-    json_document = json.loads(json_string)
+    json_document = json.loads(json_string, object_hook=remove_dot)
     number_of_oai_records = len(json_document['OAI-PMH']['ListRecords']['record'])
     i = 0
     while i < number_of_oai_records:
         if 'metadata' in json_document['OAI-PMH']['ListRecords']['record'][i]:
             record_id = json_document['OAI-PMH']['ListRecords']['record'][i]['header']['identifier']
             metadata = json_document['OAI-PMH']['ListRecords']['record'][i]['metadata']
-            result = mongocollection.update({"record_id": record_id},{"record_id": record_id, "oai_provider": oai_endpoint, "metadata": metadata}, True)
+            result = mongocollection.update({"record_id": record_id},
+                                            {"record_id": record_id, "oai_provider": oai_endpoint,
+                                             "metadata": metadata}, True)
             num_of_records += 1
         i += 1
     print('\nRecord creation complete. Created or updated {0} records.\n'.format(num_of_records))
@@ -46,6 +48,15 @@ def grab_oai(url, token, num_of_records):
         resumption_token = '&resumptionToken={0}'.format(new_session_token[0].text)
         if resumption_token != '&resumptionToken=None':
             grab_oai(oai_endpoint + "?verb=ListRecords", resumption_token, num_of_records)
+
+
+def remove_dot(obj):
+    for key in obj.keys():
+        new_key = key.replace(".", "")
+        if new_key != key:
+            obj[new_key] = obj[key]
+            del obj[key]
+    return obj
 
 
 if __name__ == "__main__":
