@@ -12,29 +12,19 @@ parser.add_argument("-s", "--string", dest="string_value", help="Enter a string 
 args = parser.parse_args()
 
 
-def find_matching_documents(format, collection, field, value):
-    if format == "oai_dc":
-        formatted_field = '{"metadata.' + format + ':dc.dc:' + field + '": "' + value + '"}'
-    elif format == "oai_qdc":
-        formatted_field = '{"metadata.' + format + ':qualifieddc.' + field + '": "' + value + '"}'
-    else:
-        formatted_field = '{"metadata.' + format + '.' + field + '": "' + value + '"}'
-    data = json.loads(formatted_field)
+def find_matching_documents(formatted_mongo_parameter, collection, value):
+    formatted_mongo_parameter = '{"' + formatted_mongo_parameter + '": "' + value + '"}'
+    print(formatted_mongo_parameter)
+    data = json.loads(formatted_mongo_parameter)
     matching_documents = collection.find(data)
     message = 'records with matching values'
-    create_file(matching_documents, formatted_field, message)
+    create_file(matching_documents, formatted_mongo_parameter, message)
 
 
-def find_distinct(format, collection, field):
-    if format == "oai_dc":
-        formatted_field = 'metadata.' + format + ':dc.dc:' + field
-    elif format == "oai_qdc":
-        formatted_field = 'metadata.' + format + ':qualifieddc.' + field
-    else:
-        formatted_field = 'metadata.' + format + '.' + field
-    cursor = collection.distinct(formatted_field)
+def find_distinct(formatted_mongo_parameter, collection):
+    cursor = collection.distinct(formatted_mongo_parameter)
     message = 'distinct values'
-    create_file(cursor, formatted_field, message)
+    create_file(cursor, formatted_mongo_parameter, message)
 
 
 def create_file(parseable_object, field, system_string):
@@ -56,18 +46,26 @@ def create_file(parseable_object, field, system_string):
     print('\nTotal {0}: {1}'.format(system_string, total_records))
 
 
-def check_exists(format, collection, field):
-    if format == "oai_dc":
-        formatted_field = '{"metadata.' + format + ':dc.dc:' + field
-    elif format == "oai_qdc":
-        formatted_field = '{"metadata.' + format + ':qualifieddc.' + field
-    else:
-        formatted_field = '{"metadata.' + format + '.' + field
-    formatted_field += '": { "$exists" : false }}'
+def check_exists(mongo_string, collection):
+    formatted_field = '{"' + mongo_string + '": { "$exists" : false }}'
+    print(formatted_field)
     data = json.loads(formatted_field)
     missing_elements = collection.find(data)
     message = 'records missing this element'
     create_file(missing_elements, formatted_field, message)
+
+
+def format_metadata(prefix, field):
+    if prefix == "oai_dc":
+        formatted_field = 'metadata.' + prefix + ':dc.dc:' + field
+    elif prefix == "mods":
+        formatted_field = 'metadata.' + prefix + '.' + field
+    elif prefix == "oai_qdc":
+        formatted_field = 'metadata.' + prefix + ':qualifieddc.' + field
+    else:
+        print('This metadata format is not currently supported. '
+              'Feel free to add an issue to the GitHub tracker.')
+    return formatted_field
 
 
 def main():
@@ -81,15 +79,18 @@ def main():
     metadata_format = args.metadata_format
     mongo_collection = db[collection]
     string_value = args.string_value
+    mongo_parameter = format_metadata(metadata_format, key)
     if args.operation == 'match':
         if string_value is None:
             print("\nMatch operations require both a key and a value.")
         else:
-            find_matching_documents(metadata_format, mongo_collection, key, string_value)
-    if args.operation == 'exists':
-        check_exists(metadata_format, mongo_collection, key)
-    if args.operation == 'find':
-        find_distinct(metadata_format, mongo_collection, key)
+            find_matching_documents(mongo_parameter, mongo_collection, string_value)
+    elif args.operation == 'exists':
+        check_exists(mongo_parameter, mongo_collection)
+    elif args.operation == 'find':
+        find_distinct(mongo_parameter, mongo_collection)
+    else:
+        print("Missing an operation.")
 
 if __name__ == "__main__":
     main()
