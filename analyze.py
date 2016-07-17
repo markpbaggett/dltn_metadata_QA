@@ -7,14 +7,14 @@ parser.add_argument("-f", "--field", dest="field", help="Specify DC Field", requ
 parser.add_argument("-c", "--collection", dest="collection", help="What collection are we calling?")
 parser.add_argument("-m", "--metadata_format", dest="metadata_format", help="Specify OAI metadata prefix",
                     required=True)
-parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, or find.", required=True)
+parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, or find.",
+                    required=True)
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
 args = parser.parse_args()
 
 
 def find_matching_documents(formatted_mongo_parameter, collection, value):
     formatted_mongo_parameter = '{"' + formatted_mongo_parameter + '": "' + value + '"}'
-    print(formatted_mongo_parameter)
     data = json.loads(formatted_mongo_parameter)
     matching_documents = collection.find(data)
     message = 'records with matching values'
@@ -38,8 +38,10 @@ def create_file(parseable_object, field, system_string):
         print('\t{0}\n'.format(document))
         text_file.write('\n\n{0}\n'.format(document))
         if system_string == 'records missing this element':
-            report.write('\n{1}. MODS: dpla.lib.utk.edu/repox/OAIHandler?verb=GetRecord&identifier={0}&metadataPrefix=MODS\n'.format(document['record_id'], total_records + 1))
-            report.write('\n\tOAI_DC: dpla.lib.utk.edu/repox/OAIHandler?verb=GetRecord&identifier={0}&metadataPrefix=oai_dc\n\n'.format(document['record_id']))
+            report.write('\n{1}. MODS: dpla.lib.utk.edu/repox/OAIHandler?verb=GetRecord&identifier='
+                         '{0}&metadataPrefix=MODS\n'.format(document['record_id'], total_records + 1))
+            report.write('\n\tOAI_DC: dpla.lib.utk.edu/repox/OAIHandler?verb=GetRecord&identifier='
+                         '{0}&metadataPrefix=oai_dc\n\n'.format(document['record_id']))
         total_records += 1
     text_file.close()
     report.close()
@@ -48,7 +50,6 @@ def create_file(parseable_object, field, system_string):
 
 def check_exists(mongo_string, collection):
     formatted_field = '{"' + mongo_string + '": { "$exists" : false }}'
-    print(formatted_field)
     data = json.loads(formatted_field)
     missing_elements = collection.find(data)
     message = 'records missing this element'
@@ -56,12 +57,14 @@ def check_exists(mongo_string, collection):
 
 
 def format_metadata(prefix, field):
-    if prefix == "oai_dc":
+    if prefix == "oai_dc" or prefix == "simple-dublin-core":
         formatted_field = 'metadata.' + prefix + ':dc.dc:' + field
     elif prefix == "mods":
         formatted_field = 'metadata.' + prefix + '.' + field
     elif prefix == "oai_qdc":
         formatted_field = 'metadata.' + prefix + ':qualifieddc.' + field
+    elif prefix == "oai_etdms":
+        formatted_field = 'metadata.thesis' + field
     else:
         print('This metadata format is not currently supported. '
               'Feel free to add an issue to the GitHub tracker.')
