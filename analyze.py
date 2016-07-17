@@ -64,7 +64,7 @@ def format_metadata(prefix, field):
     elif prefix == "oai_qdc":
         formatted_field = 'metadata.' + prefix + ':qualifieddc.' + field
     elif prefix == "oai_etdms":
-        formatted_field = 'metadata.thesis' + field
+        formatted_field = 'metadata.thesis.' + field
     else:
         print('This metadata format is not currently supported. '
               'Feel free to add an issue to the GitHub tracker.')
