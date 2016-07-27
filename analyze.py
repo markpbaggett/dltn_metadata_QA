@@ -37,7 +37,7 @@ def create_file(parseable_object, field, system_string):
     for document in parseable_object:
         print('\t{0}\n'.format(document))
         text_file.write('\n\n{0}\n'.format(document))
-        if system_string == 'records missing this element':
+        if system_string != 'distinct values':
             if 'mods' in document['metadata']:
                 report.write('{0}. [{1}]({2}?verb=GetRecord&identifier={3}'
                              '&metadataPrefix=MODS)\n'.format(total_records + 1,
@@ -50,6 +50,10 @@ def create_file(parseable_object, field, system_string):
                                                                 document['metadata']['oai_dc:dc']['dc:title'],
                                                                 document['oai_provider'],
                                                                 document['record_id']))
+            elif 'thesis' in document['metadata']:
+                report.write('{0}.[{1}]({2})\n'.format(total_records + 1,
+                                                                document['metadata']['thesis']['title'],
+                                                                document['metadata']['thesis']['identifier']))
             else:
                 report.write('{1}. {0}\n'.format(document, total_records + 1))
         else:
