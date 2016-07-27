@@ -30,9 +30,9 @@ def find_distinct(formatted_mongo_parameter, collection):
 def create_file(parseable_object, field, system_string):
     total_records = 0
     text_file = open('result.txt', 'w')
-    report = open('report.txt', 'w')
-    if system_string == 'records missing this element':
-        report.write('These records are missing a {0}:\n\n'.format(field))
+    report = open('report.md', 'w')
+    markdown_header = mark_it_down(system_string, field)
+    report.write(markdown_header)
     print('\nUnique values in {0} field:\n'.format(field))
     for document in parseable_object:
         print('\t{0}\n'.format(document))
@@ -42,6 +42,8 @@ def create_file(parseable_object, field, system_string):
                          '{0}&metadataPrefix=MODS\n'.format(document['record_id'], total_records + 1))
             report.write('\n\tOAI_DC: dpla.lib.utk.edu/repox/OAIHandler?verb=GetRecord&identifier='
                          '{0}&metadataPrefix=oai_dc\n\n'.format(document['record_id']))
+        else:
+            report.write('{1}. {0}\n'.format(document, total_records + 1))
         total_records += 1
     text_file.close()
     report.close()
@@ -69,6 +71,17 @@ def format_metadata(prefix, field):
         print('This metadata format is not currently supported. '
               'Feel free to add an issue to the GitHub tracker.')
     return formatted_field
+
+
+def mark_it_down(checker, key):
+    header_string = "# Report\n---\n"
+    if checker == 'records missing this element':
+        header_string += "These records are missing a {0}:\n\n".format(key)
+    elif checker == 'records with matching values':
+        header_string += "These records match the field and string value you provided:\n\n"
+    elif checker == 'distinct values':
+        header_string += "These are the distinct values associated with {0}:\n\n".format(key)
+    return header_string
 
 
 def main():
