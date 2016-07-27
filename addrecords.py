@@ -17,8 +17,11 @@ db = client.dltndata
 
 
 def check_endpoint(url):
-    document = etree.parse(url)
-    error_code = document.findall('//{http://www.openarchives.org/OAI/2.0/}error')
+    print(url)
+    f = urllib.request.urlopen(url)
+    s = f.read()
+    document = etree.fromstring(s)
+    error_code = document.findall('.//{http://www.openarchives.org/OAI/2.0/}error')
     if len(error_code) == 1:
         print("\nThere is something wrong with your OAI-PMH endpoint. Make sure your set or metadata format exists. "
               "For more information about your error, see this url:\n\n{0}\n".format(url))
@@ -27,8 +30,10 @@ def check_endpoint(url):
 
 
 def grab_oai(url, token, num_of_records):
-    document = etree.parse(url + token)
-    new_session_token = document.findall('//{http://www.openarchives.org/OAI/2.0/}resumptionToken')
+    f = urllib.request.urlopen(url + token)
+    s = f.read()
+    document = etree.fromstring(s)
+    new_session_token = document.findall('.//{http://www.openarchives.org/OAI/2.0/}resumptionToken')
     request = urllib.request.urlopen(url+token)
     json_string = json.dumps(xmltodict.parse(request))
     json_document = json.loads(json_string, object_hook=remove_dot)
