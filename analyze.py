@@ -38,10 +38,20 @@ def create_file(parseable_object, field, system_string):
         print('\t{0}\n'.format(document))
         text_file.write('\n\n{0}\n'.format(document))
         if system_string == 'records missing this element':
-            report.write('\n{1}. MODS: dpla.lib.utk.edu/repox/OAIHandler?verb=GetRecord&identifier='
-                         '{0}&metadataPrefix=MODS\n'.format(document['record_id'], total_records + 1))
-            report.write('\n\tOAI_DC: dpla.lib.utk.edu/repox/OAIHandler?verb=GetRecord&identifier='
-                         '{0}&metadataPrefix=oai_dc\n\n'.format(document['record_id']))
+            if 'mods' in document['metadata']:
+                report.write('{0}. [{1}]({2}?verb=GetRecord&identifier={3}'
+                             '&metadataPrefix=MODS)\n'.format(total_records + 1,
+                                                              document['metadata']['mods']['titleInfo']['title'],
+                                                              document['oai_provider'],
+                                                              document['record_id']))
+            elif 'oai_dc:dc' in document['metadata']:
+                report.write('{0}.[{1}]({2}?verb=GetRecord&identifier={3}'
+                             '&metadataPrefix=oai_dc)\n'.format(total_records + 1,
+                                                                document['metadata']['oai_dc:dc']['dc:title'],
+                                                                document['oai_provider'],
+                                                                document['record_id']))
+            else:
+                report.write('{1}. {0}\n'.format(document, total_records + 1))
         else:
             report.write('{1}. {0}\n'.format(document, total_records + 1))
         total_records += 1
