@@ -30,12 +30,13 @@ def check_endpoint(url):
 
 
 def grab_oai(url, token, num_of_records):
+    print(url + token)
     f = urllib.request.urlopen(url + token)
     s = f.read()
-    document = etree.fromstring(s)
+    clean = remove_other_bad_stuff(s)
+    document = etree.fromstring(clean)
     new_session_token = document.findall('.//{http://www.openarchives.org/OAI/2.0/}resumptionToken')
-    request = urllib.request.urlopen(url+token)
-    json_string = json.dumps(xmltodict.parse(request))
+    json_string = json.dumps(xmltodict.parse(clean))
     json_document = json.loads(json_string, object_hook=remove_dot)
     number_of_oai_records = len(json_document['OAI-PMH']['ListRecords']['record'])
     i = 0
@@ -63,6 +64,16 @@ def remove_dot(obj):
             del obj[key]
     return obj
 
+
+def remove_other_bad_stuff(some_bytes):
+    good_string = some_bytes.decode('utf-8')
+    good_string = good_string.replace(u'\u000B', u'')
+    good_string = good_string.replace(u'\u000C', u'')
+    good_bytes = good_string.encode("utf-8")
+    report = open('metadatadump.txt', 'w')
+    report.write(good_string)
+    report.close()
+    return good_bytes
 
 if __name__ == "__main__":
     # Defaults
