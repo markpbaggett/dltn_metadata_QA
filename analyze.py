@@ -115,7 +115,7 @@ def main():
             print("\nMatch operations require both a key and a value.")
         else:
             find_matching_documents(mongo_parameter, mongo_collection, string_value)
-    elif args.operation == 'exists':
+    elif args.operation == 'missing':
         check_exists(mongo_parameter, mongo_collection)
     elif args.operation == 'find':
         find_distinct(mongo_parameter, mongo_collection)
