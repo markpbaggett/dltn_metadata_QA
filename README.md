@@ -71,12 +71,21 @@ Several different scripts to help with metadata QA and cleanup for the Digital L
 
 `python3 analyze.py -c dltn_master -f location.url -o missing -m mods`
 
+#### Find If Any Records in a Collection have a Particular Field (Element) with the "Exists" Operation
+**DC Example**: Find if any records in "*mtsu_master*" have a "*dc:rights*" field.
+
+`python3 analyze.py -m oai_dc -c mtsu_master -f rights -o exists`
+
+**MODS Example**: Find if any records have a "*\location\url*".
+
+`python3 analyze.py -c dltn_master -f location.url -o exists -m mods`
+
 
 #### All available flags with *analyze.py*:
 * -m
 	* Specify the metadata format to retrieve from Mongo Collection
 * -o
-	* Choose operation: match, missing, or find.
+	* Choose operation: match, missing, exists, or find.
 * -f
 	* Specify the field (Element) to search
 * -c

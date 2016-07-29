@@ -64,11 +64,15 @@ def create_file(parseable_object, field, system_string):
     print('\nTotal {0}: {1}'.format(system_string, total_records))
 
 
-def check_exists(mongo_string, collection):
-    formatted_field = '{"' + mongo_string + '": { "$exists" : false }}'
+def check_exists(mongo_string, collection, boolean):
+    formatted_field = '{"' + mongo_string + '": { "$exists" : ' + boolean + ' }}'
+    print(formatted_field)
     data = json.loads(formatted_field)
     missing_elements = collection.find(data)
-    message = 'records missing this element'
+    if boolean == 'false':
+        message = 'records missing this element'
+    else:
+        message = 'records with this element'
     create_file(missing_elements, formatted_field, message)
 
 
@@ -116,7 +120,9 @@ def main():
         else:
             find_matching_documents(mongo_parameter, mongo_collection, string_value)
     elif args.operation == 'missing':
-        check_exists(mongo_parameter, mongo_collection)
+        check_exists(mongo_parameter, mongo_collection, 'false')
+    elif args.operation == 'exists':
+        check_exists(mongo_parameter, mongo_collection, 'true')
     elif args.operation == 'find':
         find_distinct(mongo_parameter, mongo_collection)
     else:
