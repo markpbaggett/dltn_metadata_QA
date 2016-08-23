@@ -5,8 +5,8 @@ import json
 parser = argparse.ArgumentParser(description='Enter Your OAI Endpoint Information')
 parser.add_argument("-f", "--field", dest="field", help="Specify DC Field", required=True)
 parser.add_argument("-c", "--collection", dest="collection", help="What collection are we calling?")
-parser.add_argument("-m", "--metadata_format", dest="metadata_format", help="Specify OAI metadata prefix",
-                    required=True)
+parser.add_argument("-m", "--metadata_format", dest="metadata_format", help="Specify prefix: oai_dc, oai_qdc, oai_etdms,"
+                                                                            "mods, or digital_commons", required=True)
 parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, or find.",
                     required=True)
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
@@ -85,6 +85,8 @@ def format_metadata(prefix, field):
         formatted_field = 'metadata.' + prefix + ':qualifieddc.' + field
     elif prefix == "oai_etdms":
         formatted_field = 'metadata.thesis.' + field
+    elif prefix == "digital_commons":
+        formatted_field = 'metadata.document.' + field
     else:
         print('This metadata format is not currently supported. '
               'Feel free to add an issue to the GitHub tracker.')
