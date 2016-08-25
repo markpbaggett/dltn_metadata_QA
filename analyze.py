@@ -45,7 +45,7 @@ def create_file(parseable_object, field, system_string):
                                                               document['oai_provider'],
                                                               document['record_id']))
             elif 'oai_dc:dc' in document['metadata']:
-                report.write('{0}.[{1}]({2}?verb=GetRecord&identifier={3}'
+                report.write('{0}. [{1}]({2}?verb=GetRecord&identifier={3}'
                              '&metadataPrefix=oai_dc)\n'.format(total_records + 1,
                                                                 document['metadata']['oai_dc:dc']['dc:title'],
                                                                 document['oai_provider'],
