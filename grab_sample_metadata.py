@@ -22,7 +22,7 @@ def grab_sample(url):
     sample = open(filename, "w")
     sample.write(document.text)
     sample.close()
-    print("Done.")
 
 if __name__ == "__main__":
     grab_sample(full_url)
+    print("Done.")
