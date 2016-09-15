@@ -39,20 +39,32 @@ def create_file(parseable_object, field, system_string):
         text_file.write('\n\n{0}\n'.format(document))
         if system_string != 'distinct values':
             if 'mods' in document['metadata']:
+                try:
+                    document_title = document['metadata']['mods']['titleInfo']['title']
+                except:
+                    document_title = "Not Defined in MODS Record"
                 report.write('{0}. [{1}]({2}?verb=GetRecord&identifier={3}'
                              '&metadataPrefix=MODS)\n'.format(total_records + 1,
-                                                              document['metadata']['mods']['titleInfo']['title'],
+                                                              document_title,
                                                               document['oai_provider'],
                                                               document['record_id']))
             elif 'oai_dc:dc' in document['metadata']:
+                try:
+                    document_title = document['metadata']['oai_dc:dc']['dc:title']
+                except:
+                    document_title = "Not Defined in Metadata Record"
                 report.write('{0}. [{1}]({2}?verb=GetRecord&identifier={3}'
                              '&metadataPrefix=oai_dc)\n'.format(total_records + 1,
-                                                                document['metadata']['oai_dc:dc']['dc:title'],
+                                                                document_title,
                                                                 document['oai_provider'],
                                                                 document['record_id']))
             elif 'thesis' in document['metadata']:
+                try:
+                    document_title = document['metadata']['thesis']['title']
+                except:
+                    document_title = "Not Defined in Metadata Record"
                 report.write('{0}. [{1}]({2})\n'.format(total_records + 1,
-                                                                document['metadata']['thesis']['title'],
+                                                                document_title,
                                                                 document['metadata']['thesis']['identifier']))
             else:
                 report.write('{1}. {0}\n'.format(document, total_records + 1))
@@ -87,6 +99,8 @@ def format_metadata(prefix, field):
         formatted_field = 'metadata.thesis.' + field
     elif prefix == "digital_commons":
         formatted_field = 'metadata.document.' + field
+    elif prefix == "dpla":
+        formatted_field = 'metadata.' + field
     else:
         print('This metadata format is not currently supported. '
               'Feel free to add an issue to the GitHub tracker.')
