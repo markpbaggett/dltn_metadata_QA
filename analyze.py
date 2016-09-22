@@ -118,6 +118,14 @@ def mark_it_down(checker, key):
     return header_string
 
 
+def get_list_records(mongo_string, array_length, collection):
+    mongo_key = "{0}".format(mongo_string)
+    mongo_value_str = '$size'
+    mongo_value = {mongo_value_str : array_length}
+    data = {mongo_key: mongo_value}
+    matching_documents = collection.find(data)
+    create_file(matching_documents, mongo_string, "records matching this query")
+
 def main():
     key = args.field
     if args.collection:
@@ -141,6 +149,11 @@ def main():
         check_exists(mongo_parameter, mongo_collection, 'true')
     elif args.operation == 'find':
         find_distinct(mongo_parameter, mongo_collection)
+    elif args.operation == 'length':
+        if string_value is None:
+            print("\nLength operations require both a key and a value.")
+        else:
+            get_list_records(mongo_parameter, int(string_value), mongo_collection)
     else:
         print("Missing an operation.")
 
