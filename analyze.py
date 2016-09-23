@@ -12,6 +12,19 @@ parser.add_argument("-o", "--operation", dest="operation", help="Choose operatio
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
 args = parser.parse_args()
 
+# set variables
+key = args.field
+if args.collection:
+    collection = args.collection
+else:
+    collection = "default"
+client = MongoClient()
+db = client.dltndata
+metadata_format = args.metadata_format
+mongo_collection = db[collection]
+string_value = args.string_value
+
+
 
 def find_matching_documents(formatted_mongo_parameter, collection, value):
     formatted_mongo_parameter = '{"' + formatted_mongo_parameter + '": "' + value + '"}'
@@ -126,17 +139,7 @@ def get_list_records(mongo_string, array_length, collection):
     matching_documents = collection.find(data)
     create_file(matching_documents, mongo_string, "records matching this query")
 
-def main():
-    key = args.field
-    if args.collection:
-        collection = args.collection
-    else:
-        collection = "default"
-    client = MongoClient()
-    db = client.dltndata
-    metadata_format = args.metadata_format
-    mongo_collection = db[collection]
-    string_value = args.string_value
+def call_operation():
     mongo_parameter = format_metadata(metadata_format, key)
     if args.operation == 'match':
         if string_value is None:
@@ -158,4 +161,4 @@ def main():
         print("Missing an operation.")
 
 if __name__ == "__main__":
-    main()
+    call_operation()
