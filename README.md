@@ -6,23 +6,25 @@
 
 Several different scripts to help with metadata QA and cleanup for the Digital Library of Tennessee.
 
-## Requirements
+---
 
-**NOTE:** install script coming.
+## Requirements and Installation
 
-* Python3
-* MongoDB
-* Python 3 Modules
-	* pymongo
-	* argparse
-	* json
-	* lxml
-	* xmltodict
-	* urllib
+These scripts require **Python 3.4 and above**.  For instructions on installing this to your operating system, see [python.org](https://www.python.org/downloads/).
 
-## Examples
+**MongoDB** is required for storing and analyzing documents.  For instructions on installing this to your operating system, see [the Mongo Community Page](https://www.mongodb.com/download-center#community).
 
-### Storing metadata with *addrecords.py*
+### Install Required Python Modules
+
+To install all Python dependencies, use:
+
+`pip install -r requirements.txt`
+
+---
+
+## Add Records Examples
+
+### Storing OAI-PMH with *addrecords.py*
 
 * **Grab all metadata as *"oai_dc"* from set *"p15838coll4"* at *"http://cdm15838.contentdm.oclc.org/oai/oai.php"* and write each record as a document to a collection called *"mtsu_master"*.**
 	* `python3 addrecords.py -u http://cdm15838.contentdm.oclc.org/oai/oai.php -s p15838coll4 -m oai_dc -c mtsu_master`
@@ -41,7 +43,26 @@ Several different scripts to help with metadata QA and cleanup for the Digital L
 * -h
 	* Help!!!
 
-### Q/A-ing your Metadata with *analyze.py*
+### Storing DPLA JSON-LD with *add_dpla.py*
+
+**Grab all metadata contributed to DPLA by the Digital Library of Tennessee and write to a collection called *dltn_dpla*.**
+
+`python3 add_dpla.py -k MyDPLAKey -p "http://dp.la/api/contributor/tn" -c dltn_dpla`
+
+---
+
+## Q/A-ing your Metadata with *analyze.py*
+
+**Note**: All analyze operations work with the following formats.
+
+* oai_dc
+* oai_qdc
+* oai_etdms
+* mods
+* dpla (use for DPLA JSON LD)
+* digital_commons (use for Bepress's proprietary XML format)
+
+MODS and OAI DC examples are given below for each operation, but all operations should work with each of these formats.
 
 #### Find Unique Values with "*Find*" Operation
 **DC Example:** Find all distinct values associated with the *"dc:rights"* field in *"mtsu_master""*.
@@ -80,12 +101,20 @@ Several different scripts to help with metadata QA and cleanup for the Digital L
 
 `python3 analyze.py -c dltn_master -f location.url -o exists -m mods`
 
+#### Find how many specific elements a document has with the "length" operation.
+**DC Example**: Find if any records in "*mtsu_master*" have 3 "*dc:publisher*" fields.
+
+`python3 analyze.py -m oai_dc -c mtsu_master -o length -f publisher -s 3`
+
+**MODS Example**: Find if any records in "*mtsu_master*" have 3 "*accessCondition*" fields.
+
+`python3 analyze.py -c dltn_master -f accessCondition -o length -s 3`
 
 #### All available flags with *analyze.py*:
 * -m
 	* Specify the metadata format to retrieve from Mongo Collection
 * -o
-	* Choose operation: match, missing, exists, or find.
+	* Choose operation: match, missing, exists, find, or length.
 * -f
 	* Specify the field (Element) to search
 * -c
