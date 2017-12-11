@@ -6,11 +6,12 @@ parser = argparse.ArgumentParser(description='Enter Your OAI Endpoint Informatio
 parser.add_argument("-f", "--field", dest="field", help="Specify DC Field", required=True)
 parser.add_argument("-c", "--collection", dest="collection", help="What collection are we calling?")
 parser.add_argument("-m", "--metadata_format", dest="metadata_format", help="Specify prefix: oai_dc, oai_qdc, "
-                                                                            "oai_etdms, mods, dpla, or "
+                                                                            "oai_etdms, mods, dpla, raw, or "
                                                                             "digital_commons", required=True)
-parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, or find.",
-                    required=True)
+parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, missing, length, "
+                                                                "which, or find.", required=True)
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
+parser.add_argument("-n", "--name", dest="filename", help="Enter an optional file name.")
 args = parser.parse_args()
 
 # set variables
@@ -19,12 +20,15 @@ if args.collection:
     collection = args.collection
 else:
     collection = "default"
+if args.filename:
+    report_name = args.filename
+else:
+    report_name = "report.md"
 client = MongoClient()
 db = client.dltndata
 metadata_format = args.metadata_format
 mongo_collection = db[collection]
 string_value = args.string_value
-
 
 
 def find_matching_documents(formatted_mongo_parameter, collection, value):
@@ -38,13 +42,30 @@ def find_matching_documents(formatted_mongo_parameter, collection, value):
 def find_distinct(formatted_mongo_parameter, collection):
     cursor = collection.distinct(formatted_mongo_parameter)
     message = 'distinct values'
-    create_file(cursor, formatted_mongo_parameter, message)
+    new_cursor = sorted(cursor)
+    create_file(new_cursor, formatted_mongo_parameter, message)
+
+
+def find_series(formatted_mongo_parameter, collection, value, field_we_want):
+    formatted_mongo_parameter = '{"' + formatted_mongo_parameter + '": "' + value + '"}'
+    data = json.loads(formatted_mongo_parameter)
+    matching_documents = collection.find(data)
+    message = 'records with matching values'
+    list_of_series = []
+    for document in matching_documents:
+        list_of_series.append(document[field_we_want])
+    list_of_series = list(set(list_of_series))
+    i = 1
+    for series in list_of_series:
+        print("{}. {}".format(i, series))
+        i += 1
+
 
 
 def create_file(parseable_object, field, system_string):
     total_records = 0
     text_file = open('result.txt', 'w')
-    report = open('report.md', 'w')
+    report = open(report_name, 'w')
     markdown_header = mark_it_down(system_string, field)
     report.write(markdown_header)
     print('\nUnique values in {0} field:\n'.format(field))
@@ -52,36 +73,56 @@ def create_file(parseable_object, field, system_string):
         print('\t{0}\n'.format(document))
         text_file.write('\n\n{0}\n'.format(document))
         if system_string != 'distinct values':
-            if 'mods' in document['metadata']:
-                try:
-                    document_title = document['metadata']['mods']['titleInfo']['title']
-                except:
-                    document_title = "Not Defined in MODS Record"
-                report.write('{0}. [{1}]({2}?verb=GetRecord&identifier={3}'
-                             '&metadataPrefix=MODS)\n'.format(total_records + 1,
-                                                              document_title,
-                                                              document['oai_provider'],
-                                                              document['record_id']))
-            elif 'oai_dc:dc' in document['metadata']:
-                try:
-                    document_title = document['metadata']['oai_dc:dc']['dc:title']
-                except:
-                    document_title = "Not Defined in Metadata Record"
-                report.write('{0}. [{1}]({2}?verb=GetRecord&identifier={3}'
-                             '&metadataPrefix=oai_dc)\n'.format(total_records + 1,
-                                                                document_title,
-                                                                document['oai_provider'],
-                                                                document['record_id']))
-            elif 'thesis' in document['metadata']:
-                try:
-                    document_title = document['metadata']['thesis']['title']
-                except:
-                    document_title = "Not Defined in Metadata Record"
-                report.write('{0}. [{1}]({2})\n'.format(total_records + 1,
-                                                                document_title,
-                                                                document['metadata']['thesis']['identifier']))
-            else:
-                report.write('{1}. {0}\n'.format(document, total_records + 1))
+            try:
+                if 'mods' in document['metadata']:
+                    try:
+                        document_title = document['metadata']['mods']['titleInfo']['title']
+                    except:
+                        document_title = "Not Defined in MODS Record"
+                    report.write('{0}. [{1}]({2}?verb=GetRecord&identifier={3}'
+                                 '&metadataPrefix=MODS)\n'.format(total_records + 1,
+                                                                  document_title,
+                                                                  document['oai_provider'],
+                                                                  document['record_id']))
+                elif 'oai_dc:dc' in document['metadata']:
+                    try:
+                        document_title = document['metadata']['oai_dc:dc']['dc:title']
+                    except:
+                        document_title = "Not Defined in Metadata Record"
+                    report.write('{0}. [{1}]({2}?verb=GetRecord&identifier={3}'
+                                 '&metadataPrefix=oai_dc)\n'.format(total_records + 1,
+                                                                    document_title,
+                                                                    document['oai_provider'],
+                                                                    document['record_id']))
+                elif 'thesis' in document['metadata']:
+                    try:
+                        document_title = document['metadata']['thesis']['title']
+                    except:
+                        document_title = "Not Defined in Metadata Record"
+                    report.write('{0}. [{1}]({2})\n'.format(total_records + 1,
+                                                                    document_title,
+                                                                    document['metadata']['thesis']['identifier']))
+                elif 'oai_qdc:qualifieddc'in document['metadata']:
+                    try:
+                        document_title = document['metadata']['oai_qdc:qualifieddc']['dc:title']
+                        document_link = document['metadata']['oai_qdc:qualifieddc']['dc:identifier']
+                        test = document['metadata']['oai_qdc:qualifieddc']['dc:identifier']
+                        if type(test) is list:
+                            for q in test:
+                                if q.find("http") is not -1:
+                                    document_link = q
+                        else:
+                            document_link = document['metadata']['oai_qdc:qualifieddc']['dc:identifier']
+                    except:
+                        document_title = "Not Defined in Metadata Record"
+                    report.write('{0}. [{1}]({2})\n'.format(total_records + 1,
+                                                                    document_title,
+                                                                    document_link))
+                else:
+                    report.write('{1}. {0}\n'.format(document, total_records + 1))
+            except:
+                print("There was a problem creating the report.")
+                pass
         else:
             report.write('{1}. {0}\n'.format(document, total_records + 1))
         total_records += 1
@@ -92,7 +133,6 @@ def create_file(parseable_object, field, system_string):
 
 def check_exists(mongo_string, collection, boolean):
     formatted_field = '{"' + mongo_string + '": { "$exists" : ' + boolean + ' }}'
-    print(formatted_field)
     data = json.loads(formatted_field)
     missing_elements = collection.find(data)
     if boolean == 'false':
@@ -115,6 +155,8 @@ def format_metadata(prefix, field):
         formatted_field = 'metadata.document.' + field
     elif prefix == "dpla":
         formatted_field = 'metadata.' + field
+    elif prefix == "raw":
+        formatted_field = field
     else:
         print('This metadata format is not currently supported. '
               'Feel free to add an issue to the GitHub tracker.')
@@ -158,6 +200,9 @@ def call_operation():
             print("\nLength operations require both a key and a value.")
         else:
             get_list_records(mongo_parameter, int(string_value), mongo_collection)
+    elif args.operation == 'which':
+        print(mongo_parameter)
+        find_series(mongo_parameter, mongo_collection, string_value, "series")
     else:
         print("Missing an operation.")
 

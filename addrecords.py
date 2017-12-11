@@ -45,7 +45,7 @@ def grab_oai(url, token, num_of_records):
             record_id = json_document['OAI-PMH']['ListRecords']['record'][i]['header']['identifier']
             metadata = json_document['OAI-PMH']['ListRecords']['record'][i]['metadata']
             result = mongocollection.update({"record_id": record_id},
-                                            {"record_id": record_id, "oai_provider": oai_endpoint,
+                                            {"record_id": record_id, "oai_provider": oai_endpoint, "set": oai_set,
                                              "metadata": metadata}, True)
             num_of_records += 1
         i += 1
