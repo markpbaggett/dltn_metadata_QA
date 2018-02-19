@@ -25,6 +25,19 @@ metadata_format = args.metadata_format
 mongo_collection = db[collection]
 string_value = args.string_value
 
+def find_series(formatted_mongo_parameter, collection, value, field_we_want):
+    formatted_mongo_parameter = '{"' + formatted_mongo_parameter + '": "' + value + '"}'
+    data = json.loads(formatted_mongo_parameter)
+    matching_documents = collection.find(data)
+    message = 'records with matching values'
+    list_of_series = []
+    for document in matching_documents:
+        list_of_series.append(document[field_we_want])
+    list_of_series = list(set(list_of_series))
+    i = 1
+    for series in list_of_series:
+        print("{}. {}".format(i, series))
+        i += 1
 
 
 def find_matching_documents(formatted_mongo_parameter, collection, value):
