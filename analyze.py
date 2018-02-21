@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 import argparse
 import json
+import yaml
 
 parser = argparse.ArgumentParser(description='Enter Your OAI Endpoint Information')
 parser.add_argument("-f", "--field", dest="field", help="Specify DC Field", required=True)
@@ -8,9 +9,12 @@ parser.add_argument("-c", "--collection", dest="collection", help="What collecti
 parser.add_argument("-m", "--metadata_format", dest="metadata_format", help="Specify prefix: oai_dc, oai_qdc, "
                                                                             "oai_etdms, mods, dpla, or "
                                                                             "digital_commons", required=True)
-parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, or find.",
+parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, missing, length,"
+                                                                "which, contains, or find.",
                     required=True)
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
+parser.add_argument("-w", "--which", dest="which_value", help="If using which value, specify field you want returned."
+                                                              "i.e. series")
 args = parser.parse_args()
 
 # set variables
@@ -24,6 +28,10 @@ db = client.dltndata
 metadata_format = args.metadata_format
 mongo_collection = db[collection]
 string_value = args.string_value
+if args.which_value:
+    which_value = args.which_value
+else:
+    which_value = "series"
 
 def find_series(formatted_mongo_parameter, collection, value, field_we_want):
     formatted_mongo_parameter = '{"' + formatted_mongo_parameter + '": "' + value + '"}'
@@ -44,6 +52,15 @@ def find_matching_documents(formatted_mongo_parameter, collection, value):
     formatted_mongo_parameter = '{"' + formatted_mongo_parameter + '": "' + value + '"}'
     data = json.loads(formatted_mongo_parameter)
     matching_documents = collection.find(data)
+    # with open("marks.json", 'w') as file:
+    #     output = {}
+    #     i = 1
+    #     for document in matching_documents:
+    #         output[f"Record_{i}"] = document
+    #         i += 1
+    #     print(type(output))
+    #     final_json = json.dumps(output)
+    #     file.write(final_json)
     message = 'records with matching values'
     create_file(matching_documents, formatted_mongo_parameter, message)
 
@@ -53,6 +70,14 @@ def find_distinct(formatted_mongo_parameter, collection):
     message = 'distinct values'
     create_file(cursor, formatted_mongo_parameter, message)
 
+def create_yaml(a_list):
+    data = {}
+    values = []
+    for x in a_list:
+        values.append(x)
+    data["records"] = values
+    with open('data.yml', 'w') as outfile:
+        yaml.dump(data, outfile, default_flow_style=False)
 
 def create_file(parseable_object, field, system_string):
     total_records = 0
@@ -61,9 +86,10 @@ def create_file(parseable_object, field, system_string):
     markdown_header = mark_it_down(system_string, field)
     report.write(markdown_header)
     print('\nUnique values in {0} field:\n'.format(field))
+    create_yaml(parseable_object)
     for document in parseable_object:
         print('\t{0}\n'.format(document))
-        text_file.write('\n\n{0}\n'.format(document))
+        text_file.write('{0}\n'.format(document))
         if system_string != 'distinct values':
             if 'mods' in document['metadata']:
                 try:
@@ -113,6 +139,18 @@ def check_exists(mongo_string, collection, boolean):
     else:
         message = 'records with this element'
     create_file(missing_elements, formatted_field, message)
+
+
+def contains(mongo_field, collection, mongo_string):
+    # db.users.findOne({"username" : {$regex : ".*son.*"}});
+
+    #db.all_trace_dig_comm.findOne({"metadata.document.fields.field.@value" : {$regex : ".*a.*"}});
+
+    formatted_field = '{"' + mongo_field + '" : {"$regex" : ".*' + mongo_string + '.*"}}'
+    print(formatted_field)
+    #data = json.loads(formatted_field)
+    x = collection.find_one(formatted_field)
+    print(x)
 
 
 def format_metadata(prefix, field):
@@ -171,6 +209,12 @@ def call_operation():
             print("\nLength operations require both a key and a value.")
         else:
             get_list_records(mongo_parameter, int(string_value), mongo_collection)
+    elif args.operation == 'which':
+        print(mongo_parameter)
+        find_series(mongo_parameter, mongo_collection, string_value, which_value)
+    elif args.operation == "contains":
+        print(mongo_parameter)
+        contains(mongo_parameter, mongo_collection, string_value)
     else:
         print("Missing an operation.")
 
