@@ -15,6 +15,7 @@ parser.add_argument("-o", "--operation", dest="operation", help="Choose operatio
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
 parser.add_argument("-w", "--which", dest="which_value", help="If using which value, specify field you want returned."
                                                               "i.e. series")
+parser.add_argument("-aw", dest="aw_value", help="Optional which to add a string.")
 args = parser.parse_args()
 
 # set variables
@@ -23,6 +24,10 @@ if args.collection:
     collection = args.collection
 else:
     collection = "default"
+if args.aw_value:
+    aw_value = args.aw_value
+else:
+    aw_value = None
 client = MongoClient()
 db = client.dltndata
 metadata_format = args.metadata_format
@@ -33,14 +38,21 @@ if args.which_value:
 else:
     which_value = "series"
 
-def find_series(formatted_mongo_parameter, collection, value, field_we_want):
+def find_series(formatted_mongo_parameter, collection, value, field_we_want, aw=None):
     formatted_mongo_parameter = '{"' + formatted_mongo_parameter + '": "' + value + '"}'
     data = json.loads(formatted_mongo_parameter)
     matching_documents = collection.find(data)
     message = 'records with matching values'
     list_of_series = []
-    for document in matching_documents:
-        list_of_series.append(document[field_we_want])
+    if aw is not None:
+        for document in matching_documents:
+            for fields in document["metadata"]["mods"]["titleInfo"]["title"]:
+                if fields["@name"] == aw:
+                    print(fields["value"])
+            list_of_series.append(document[field_we_want])
+    else:
+        for document in matching_documents:
+            list_of_series.append(document[field_we_want])
     list_of_series = list(set(list_of_series))
     i = 1
     for series in list_of_series:
@@ -52,15 +64,6 @@ def find_matching_documents(formatted_mongo_parameter, collection, value):
     formatted_mongo_parameter = '{"' + formatted_mongo_parameter + '": "' + value + '"}'
     data = json.loads(formatted_mongo_parameter)
     matching_documents = collection.find(data)
-    # with open("marks.json", 'w') as file:
-    #     output = {}
-    #     i = 1
-    #     for document in matching_documents:
-    #         output[f"Record_{i}"] = document
-    #         i += 1
-    #     print(type(output))
-    #     final_json = json.dumps(output)
-    #     file.write(final_json)
     message = 'records with matching values'
     create_file(matching_documents, formatted_mongo_parameter, message)
 
@@ -86,7 +89,6 @@ def create_file(parseable_object, field, system_string):
     markdown_header = mark_it_down(system_string, field)
     report.write(markdown_header)
     print('\nUnique values in {0} field:\n'.format(field))
-    create_yaml(parseable_object)
     for document in parseable_object:
         print('\t{0}\n'.format(document))
         text_file.write('{0}\n'.format(document))
@@ -211,7 +213,7 @@ def call_operation():
             get_list_records(mongo_parameter, int(string_value), mongo_collection)
     elif args.operation == 'which':
         print(mongo_parameter)
-        find_series(mongo_parameter, mongo_collection, string_value, which_value)
+        find_series(mongo_parameter, mongo_collection, string_value, which_value, aw_value)
     elif args.operation == "contains":
         print(mongo_parameter)
         contains(mongo_parameter, mongo_collection, string_value)
