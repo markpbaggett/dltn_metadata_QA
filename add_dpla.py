@@ -7,6 +7,7 @@ parser = argparse.ArgumentParser(description='Enter Your DPLA Connection Info')
 parser.add_argument("-k", "--key", dest="api_key", help="Specify your API key", required=True)
 parser.add_argument("-p", "--provider", dest="data_provider", help="Specify your data_provider")
 parser.add_argument("-c", "--collection", dest="collection", help="Which collection?")
+parser.add_argument("-dp", "--dataprovider", dest="real_data_provider", help="Which data provider?")
 args = parser.parse_args()
 
 client = MongoClient()
@@ -16,16 +17,20 @@ db = client.dltndata
 if args.data_provider:
     data_provider = args.data_provider
 else:
-    data_provider = "http://dp.la/api/contributor/tn"
+    data_provider = "http://dp.la/api/contributor/tennessee"
 api_key = args.api_key
 if args.collection:
     collection = args.collection
 else:
     collection = "dpla_test"
+if args.real_data_provider:
+    real_data_provider = f"&dataProvider={args.real_data_provider}"
+else:
+    real_data_provider = ""
 
 
 def get_count(key, provider):
-    full_url = "http://api.dp.la/v2/items?q=&provider.@id={0}&page_size=1&page=1&api_key={1}".format(provider, key)
+    full_url = "http://api.dp.la/v2/items?q={2}&provider.@id={0}&page_size=1&page=1&api_key={1}".format(provider, key, real_data_provider)
     x = requests.get(full_url)
     if x.status_code == 200:
         results = x.json()
