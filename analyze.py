@@ -10,7 +10,7 @@ parser.add_argument("-m", "--metadata_format", dest="metadata_format", help="Spe
                                                                             "oai_etdms, mods, dpla, or "
                                                                             "digital_commons", required=True)
 parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, missing, length,"
-                                                                "which, contains, or find.",
+                                                                "which, contains, is_null, or find.",
                     required=True)
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
 parser.add_argument("-w", "--which", dest="which_value", help="If using which value, specify field you want returned."
@@ -131,6 +131,15 @@ def create_file(parseable_object, field, system_string):
     print('\nTotal {0}: {1}'.format(system_string, total_records))
 
 
+def is_null(mongo_string, collection):
+    formatted_field = '{"' + mongo_string + '": null }'
+    print(formatted_field)
+    data = json.loads(formatted_field)
+    missing_elements = collection.find(data)
+    print(data)
+    create_file(missing_elements, formatted_field, "test")
+
+
 def check_exists(mongo_string, collection, boolean):
     formatted_field = '{"' + mongo_string + '": { "$exists" : ' + boolean + ' }}'
     print(formatted_field)
@@ -202,6 +211,8 @@ def call_operation():
             find_matching_documents(mongo_parameter, mongo_collection, string_value)
     elif args.operation == 'missing':
         check_exists(mongo_parameter, mongo_collection, 'false')
+    elif args.operation == 'is_null':
+        is_null(mongo_parameter, mongo_collection)
     elif args.operation == 'exists':
         check_exists(mongo_parameter, mongo_collection, 'true')
     elif args.operation == 'find':
