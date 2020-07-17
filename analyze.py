@@ -11,6 +11,7 @@ parser.add_argument("-m", "--metadata_format", dest="metadata_format", help="Spe
 parser.add_argument("-o", "--operation", dest="operation", help="Choose operation: match, exists, or find.",
                     required=True)
 parser.add_argument("-s", "--string", dest="string_value", help="Enter a string to search on.")
+parser.add_argument("-mu", "--mongo_uri", dest="mongo_uri", help="Specifiy Mongouri", default="localhost")
 args = parser.parse_args()
 
 # set variables
@@ -19,12 +20,11 @@ if args.collection:
     collection = args.collection
 else:
     collection = "default"
-client = MongoClient()
+client = MongoClient(f'mongodb://{args.mongo_uri}:27017/')
 db = client.dltndata
 metadata_format = args.metadata_format
 mongo_collection = db[collection]
 string_value = args.string_value
-
 
 
 def find_matching_documents(formatted_mongo_parameter, collection, value):
@@ -140,6 +140,7 @@ def get_list_records(mongo_string, array_length, collection):
     matching_documents = collection.find(data)
     create_file(matching_documents, mongo_string, "records matching this query")
 
+
 def call_operation():
     mongo_parameter = format_metadata(metadata_format, key)
     if args.operation == 'match':
@@ -160,6 +161,7 @@ def call_operation():
             get_list_records(mongo_parameter, int(string_value), mongo_collection)
     else:
         print("Missing an operation.")
+
 
 if __name__ == "__main__":
     call_operation()
