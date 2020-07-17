@@ -10,9 +10,10 @@ parser.add_argument("-u", "--url", dest="urlforoai", help="Specify your OAI endp
 parser.add_argument("-s", "--set", dest="oaiset", help="Specify your OAI set")
 parser.add_argument("-m", "--metadata_prefix", dest="metadata_prefix", help="Specify metadata prefix", required=True)
 parser.add_argument("-c", "--collection", dest="collection", help="Which collection?")
+parser.add_argument("-mu", "--mongo_uri", dest="mongo_uri", help="Specifiy Mongouri", default="localhost")
 args = parser.parse_args()
 
-client = MongoClient()
+client = MongoClient(f'mongodb://{args.mongo_uri}:27017/')
 db = client.dltndata
 
 
