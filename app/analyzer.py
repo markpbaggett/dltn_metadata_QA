@@ -39,9 +39,22 @@ class MongoAnalyzer:
             )
         ]
 
+    def check_if_exists(self, exists=True):
+        return [
+            doc
+            for doc in self.collection.find(
+                json.loads(
+                    f'{{ "{self.formatted_field}": {{ "$exists" : {str(exists).lower()} }}}}'
+                )
+            )
+        ]
+
 
 if __name__ == "__main__":
-    x = MongoAnalyzer("name.role.roleTerm.#text", "mods", "all_digital_oai")
-    test = x.match("Minute")
+    x = MongoAnalyzer("titleInfo", "mods", "all_digital_oai")
+    # test = x.match(True)
+    # for document in test:
+    #     print(document)
+    test = x.check_if_exists(True)
     for document in test:
         print(document)
