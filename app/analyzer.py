@@ -139,7 +139,42 @@ class MongoAnalyzer:
         Returns:
             list: The list of matching documents.
 
-        @TODO: this doesn't work
+        Example:
+            >>> MongoAnalyzer().find_based_on_array_length(6)
+            {'_id': ObjectId('5eea8d4236e31071221c064e'), 'record_id': 'oai:utklib:knoxgardens_129', 'oai_provider':
+            'https://digital.lib.utk.edu/collections/oai2', 'metadata': {'mods': {'@xmlns': 'http://www.loc.gov/mods/v3',
+            '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance', '@xmlns:xlink': 'http://www.w3.org/1999/xlink',
+            '@xmlns:xs': 'http://www.w3.org/2001/XMLSchema', '@xsi:schemaLocation':
+            'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd', 'identifier': [{'@type':
+            'local', '#text': '0012_000463_000229'}, {'@type': 'pid', '#text': 'knoxgardens:129'}, {'@type':
+            'slide number', '#text': 'Slide 16'}, {'@type': 'film number', '#text': 'Film  81'}, {'@type': 'spc',
+            '#text': 'record_spc_4504'}, 'https://digital.lib.utk.edu/collections/islandora/object/knoxgardens%3A129'],
+            'titleInfo': {'title': 'Flame Azalea'}, 'abstract': 'Glass slide of Flame Azalea flowers.', 'originInfo':
+            {'dateCreated': [{'@qualifier': 'inferred', '#text': '1927-1935'}, {'@encoding': 'edtf', '@point': 'start',
+            '@qualifier': 'inferred', '@keyDate': 'yes', '#text': '1930'}, {'@encoding': 'edtf', '@point': 'end',
+            '@qualifier': 'inferred', '#text': '1939'}]}, 'physicalDescription': {'form': {'@authority': 'aat',
+            '@valueURI': 'http://vocab.getty.edu/aat/300134977', '#text': 'lantern slides'}, 'extent':
+            '3 1/4 x 5 inches', 'internetMediaType': 'image/jp2'}, 'name': {'@valueURI':
+            'http://id.loc.gov/authorities/names/no2018075078', '@authority': 'naf', 'namePart': 'Jim Thompson Company',
+            'role': {'roleTerm': {'@authority': 'marcrelator', '@valueURI': 'http://id.loc.gov/vocabulary/relators/pht',
+            '#text': 'Photographer'}}}, 'subject': [{'@authority': 'lcsh', '@valueURI':
+            'http://id.loc.gov/authorities/subjects/sh85101348', 'topic': 'Photography of gardens'}, {'@authority':
+            'lcsh', '@valueURI': 'http://id.loc.gov/authorities/subjects/sh85053123', 'topic': 'Gardens, American'},
+            {'@authority': 'lcsh', '@valueURI': 'http://id.loc.gov/authorities/subjects/sh85010626', 'topic': 'Azaleas'},
+            {'@authority': 'lcsh', '@valueURI': 'http://id.loc.gov/authorities/subjects/sh85113765', 'topic': 'Rhododendrons'},
+            {'@authority': 'naf', '@valueURI': 'http://id.loc.gov/authorities/names/n79109786', 'geographic': 'Knoxville (Tenn.)',
+            'cartographics': {'coordinates': '35.96064, -83.92074'}}], 'note':
+            'Mrs. A. C. Bruner donated this collection to the University of Tennessee. Creation dates were inferred from the dates associated with the archival collection and the activity dates of the Jim Thompson Company.',
+            'relatedItem': [{'@displayLabel': 'Project', '@type': 'host', 'titleInfo': {'title':
+            'Knoxville Garden Slides'}}, {'@displayLabel': 'Collection', '@type': 'host', 'titleInfo': {'title':
+            'Knoxville Gardens Slides'}, 'identifier': 'MS.1324', 'location': {'url':
+            'https://n2t.net/ark:/87290/v88w3bgf'}}], 'typeOfResource': 'still image', 'location': {'physicalLocation':
+            {'@valueURI': 'http://id.loc.gov/authorities/names/no2014027633', '#text':
+            'University of Tennessee, Knoxville. Special Collections'}}, 'recordInfo': {'recordContentSource': {
+            '@valueURI': 'http://id.loc.gov/authorities/names/n87808088', '#text':
+            'University of Tennessee, Knoxville. Libraries'}, 'languageOfCataloging': {'languageTerm': {'@type': 'text',
+            '@authority': 'iso639-2b', '#text': 'English'}}}, 'accessCondition': {'@type': 'use and reproduction',
+            '@xlink:href': 'http://rightsstatements.org/vocab/InC/1.0/', '#text': 'In Copyright'}}}}]
 
         """
         return [
@@ -213,3 +248,8 @@ class MongoAnalyzer:
                 )
             )
         ]
+
+
+class AnalyzeReport:
+    def __init__(self, mongo_matches, formatted_field, message):
+        return
