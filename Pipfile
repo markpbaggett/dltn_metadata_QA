@@ -11,6 +11,7 @@ urllib3 = "*"
 requests = "*"
 pymongo = "*"
 lxml = "*"
+black = "*"
 
 [requires]
 python_version = "3.8"
