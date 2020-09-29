@@ -140,7 +140,7 @@ class MongoAnalyzer:
             list: The list of matching documents.
 
         Example:
-            >>> MongoAnalyzer().find_based_on_array_length(6)
+            >>> MongoAnalyzer("identifier", "mods", "some_digital_oai").find_based_on_array_length(6)
             {'_id': ObjectId('5eea8d4236e31071221c064e'), 'record_id': 'oai:utklib:knoxgardens_129', 'oai_provider':
             'https://digital.lib.utk.edu/collections/oai2', 'metadata': {'mods': {'@xmlns': 'http://www.loc.gov/mods/v3',
             '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance', '@xmlns:xlink': 'http://www.w3.org/1999/xlink',
@@ -248,8 +248,3 @@ class MongoAnalyzer:
                 )
             )
         ]
-
-
-class AnalyzeReport:
-    def __init__(self, mongo_matches, formatted_field, message):
-        return
