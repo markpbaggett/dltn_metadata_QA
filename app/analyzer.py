@@ -42,7 +42,7 @@ class MongoAnalyzer:
             list: a list of distinct values as strings, dicts, etc.
 
         Example:
-            >>> MongoAnalyzer("recordInfo.recordContentSource", "mods", "some_digital_oai").find()
+            >>> MongoAnalyzer("recordInfo.recordContentSource", "mods", "some_digital_oai").find_distinct()
             [None, 'Athenaeum Rectory', 'Austin Peay State University', 'Blount County Public Library',
             'Calvin M. McClung Historical Collection']
 
